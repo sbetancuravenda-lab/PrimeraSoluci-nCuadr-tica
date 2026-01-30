@@ -994,4 +994,301 @@
                         <p>
                             <strong>x₁ =</strong> <span class="valor-solucion">${formatearNumero(x1)}</span>
                             <br>
-                            <strong>x₂ =</strong> <span class="valor-solucion">${
+                            <strong>x₂ =</strong> <span class="valor-solucion">${formatearNumero(x2)}</span>
+                        </p>
+                        <p>
+                            <strong>Cálculo:</strong><br>
+                            x₁ = [${-b} + √${D}] / (2·${a}) = ${formatearNumero(x1)}<br>
+                            x₂ = [${-b} - √${D}] / (2·${a}) = ${formatearNumero(x2)}
+                        </p>
+                        <p><em>Mostrando ${decimales} decimales</em></p>
+                    </div>
+                `;
+                
+                explicacionHTML = `
+                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
+                    <p>Como el discriminante D = ${formatearNumero(D)} es mayor que cero, la ecuación cuadrática tiene dos soluciones reales y distintas.</p>
+                    <p>Esto significa que la parábola representada por la ecuación cruza el eje X en dos puntos distintos: (${formatearNumero(x1)}, 0) y (${formatearNumero(x2)}, 0).</p>
+                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
+                `;
+            } 
+            else if (D === 0) {
+                // Una solución real (doble)
+                const x = -b / (2 * a);
+                
+                solucionHTML = `
+                    <div class="solucion-unica">
+                        <h3><i class="fas fa-info-circle"></i> La ecuación tiene una solución real doble:</h3>
+                        <p><strong>x =</strong> <span class="valor-solucion">${formatearNumero(x)}</span></p>
+                        <p>
+                            <strong>Cálculo:</strong><br>
+                            x = ${-b} / (2·${a}) = ${formatearNumero(x)}
+                        </p>
+                        <p><em>Mostrando ${decimales} decimales</em></p>
+                    </div>
+                `;
+                
+                explicacionHTML = `
+                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
+                    <p>Como el discriminante D = ${formatearNumero(D)} es igual a cero, la ecuación cuadrática tiene una única solución real (solución doble).</p>
+                    <p>Esto significa que la parábola representada por la ecuación toca el eje X en un solo punto: (${formatearNumero(x)}, 0), que es el vértice de la parábola.</p>
+                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
+                `;
+            } 
+            else {
+                // Soluciones complejas
+                const parteReal = -b/(2*a);
+                const parteImaginaria = Math.sqrt(-D)/(2*a);
+                
+                solucionHTML = `
+                    <div class="solucion-compleja">
+                        <h3><i class="fas fa-exclamation-triangle"></i> La solución es compleja</h3>
+                        <p>El discriminante es negativo (D = ${formatearNumero(D)}), por lo tanto las soluciones son números complejos.</p>
+                        <p>
+                            <strong>Parte real:</strong> <span class="valor-solucion">${formatearNumero(parteReal)}</span><br>
+                            <strong>Parte imaginaria:</strong> <span class="valor-solucion">±${formatearNumero(parteImaginaria)}i</span>
+                        </p>
+                        <p>
+                            <strong>Solución completa:</strong><br>
+                            x = ${formatearNumero(parteReal)} ± ${formatearNumero(parteImaginaria)}i
+                        </p>
+                        <p><em>Mostrando ${decimales} decimales</em></p>
+                    </div>
+                `;
+                
+                explicacionHTML = `
+                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
+                    <p>Como el discriminante D = ${formatearNumero(D)} es menor que cero, la ecuación cuadrática no tiene soluciones reales, sino dos soluciones complejas conjugadas.</p>
+                    <p>Esto significa que la parábola representada por la ecuación no cruza el eje X en ningún punto real.</p>
+                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
+                `;
+            }
+            
+            document.getElementById('solucion-mostrada').innerHTML = solucionHTML;
+            document.getElementById('explicacion-mostrada').innerHTML = explicacionHTML;
+        }
+        
+        function dibujarGrafica(datos) {
+            const { a, b, c, D } = datos;
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Configuración de la gráfica
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            const graphWidth = width - 2 * padding;
+            const graphHeight = height - 2 * padding;
+            
+            // Función para convertir coordenadas matemáticas a píxeles
+            const toX = (x) => padding + ((x - rangoXMin) / (rangoXMax - rangoXMin)) * graphWidth;
+            const toY = (y) => padding + graphHeight - ((y - rangoYMin) / (rangoYMax - rangoYMin)) * graphHeight;
+            
+            // Función cuadrática
+            const f = (x) => a * x * x + b * x + c;
+            
+            // Dibujar ejes coordenados
+            ctx.beginPath();
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 1;
+            
+            // Eje X
+            if (rangoYMin <= 0 && rangoYMax >= 0) {
+                ctx.moveTo(toX(rangoXMin), toY(0));
+                ctx.lineTo(toX(rangoXMax), toY(0));
+            }
+            
+            // Eje Y
+            if (rangoXMin <= 0 && rangoXMax >= 0) {
+                ctx.moveTo(toX(0), toY(rangoYMin));
+                ctx.lineTo(toX(0), toY(rangoYMax));
+            }
+            
+            ctx.stroke();
+            
+            // Dibujar líneas de la cuadrícula
+            ctx.beginPath();
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 0.5;
+            
+            // Líneas verticales
+            const stepX = calcularPaso(rangoXMax - rangoXMin);
+            for (let x = Math.ceil(rangoXMin / stepX) * stepX; x <= rangoXMax; x += stepX) {
+                if (Math.abs(x) > 0.001) { // No dibujar en el eje Y
+                    ctx.moveTo(toX(x), toY(rangoYMin));
+                    ctx.lineTo(toX(x), toY(rangoYMax));
+                }
+            }
+            
+            // Líneas horizontales
+            const stepY = calcularPaso(rangoYMax - rangoYMin);
+            for (let y = Math.ceil(rangoYMin / stepY) * stepY; y <= rangoYMax; y += stepY) {
+                if (Math.abs(y) > 0.001) { // No dibujar en el eje X
+                    ctx.moveTo(toX(rangoXMin), toY(y));
+                    ctx.lineTo(toX(rangoXMax), toY(y));
+                }
+            }
+            
+            ctx.stroke();
+            
+            // Dibujar etiquetas de los ejes
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            
+            // Etiquetas eje X
+            for (let x = Math.ceil(rangoXMin / stepX) * stepX; x <= rangoXMax; x += stepX) {
+                if (Math.abs(x) > 0.001) {
+                    ctx.fillText(x.toFixed(1), toX(x), toY(0) + 5);
+                }
+            }
+            
+            // Etiquetas eje Y
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let y = Math.ceil(rangoYMin / stepY) * stepY; y <= rangoYMax; y += stepY) {
+                if (Math.abs(y) > 0.001) {
+                    ctx.fillText(y.toFixed(1), toX(0) - 5, toY(y));
+                }
+            }
+            
+            // Etiqueta eje X
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('X', width - 5, toY(0) - 20);
+            
+            // Etiqueta eje Y
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText('Y', toX(0) + 10, 5);
+            
+            // Dibujar la parábola
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 3;
+            
+            let puntoInicial = true;
+            const paso = (rangoXMax - rangoXMin) / 200;
+            
+            for (let x = rangoXMin; x <= rangoXMax; x += paso) {
+                const y = f(x);
+                
+                if (y >= rangoYMin && y <= rangoYMax) {
+                    if (puntoInicial) {
+                        ctx.moveTo(toX(x), toY(y));
+                        puntoInicial = false;
+                    } else {
+                        ctx.lineTo(toX(x), toY(y));
+                    }
+                } else {
+                    puntoInicial = true;
+                }
+            }
+            
+            ctx.stroke();
+            
+            // Dibujar raíces si son reales
+            if (D >= 0) {
+                const raices = D > 0 ? [
+                    (-b + Math.sqrt(D)) / (2 * a),
+                    (-b - Math.sqrt(D)) / (2 * a)
+                ] : [-b / (2 * a)];
+                
+                ctx.fillStyle = '#e74c3c';
+                
+                raices.forEach(raiz => {
+                    if (raiz >= rangoXMin && raiz <= rangoXMax) {
+                        const y = f(raiz);
+                        if (y >= rangoYMin && y <= rangoYMax) {
+                            ctx.beginPath();
+                            ctx.arc(toX(raiz), toY(y), 6, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            // Etiqueta de la raíz
+                            ctx.fillStyle = '#2c3e50';
+                            ctx.font = 'bold 12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.fillText(`(${raiz.toFixed(decimales)}, 0)`, toX(raiz), toY(y) - 10);
+                            ctx.fillStyle = '#e74c3c';
+                        }
+                    }
+                });
+            }
+            
+            // Dibujar vértice
+            const verticeX = -b / (2 * a);
+            const verticeY = f(verticeX);
+            
+            if (verticeX >= rangoXMin && verticeX <= rangoXMax && 
+                verticeY >= rangoYMin && verticeY <= rangoYMax) {
+                ctx.fillStyle = '#27ae60';
+                ctx.beginPath();
+                ctx.arc(toX(verticeX), toY(verticeY), 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Etiqueta del vértice
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`V(${verticeX.toFixed(decimales)}, ${verticeY.toFixed(decimales)})`, 
+                           toX(verticeX), toY(verticeY) + 10);
+            }
+        }
+        
+        function calcularPaso(rango) {
+            // Calcular un paso adecuado para la cuadrícula
+            const potencia = Math.floor(Math.log10(rango));
+            const factor = rango / Math.pow(10, potencia);
+            
+            if (factor < 2) return Math.pow(10, potencia) / 5;
+            if (factor < 5) return Math.pow(10, potencia) / 2;
+            return Math.pow(10, potencia);
+        }
+        
+        function formatearNumero(num) {
+            // Formatear número con la cantidad de decimales especificada
+            if (decimales === 0) {
+                return Math.round(num).toString();
+            }
+            return num.toFixed(decimales);
+        }
+        
+        function formatearCoeficiente(coef, esPrimero) {
+            if (coef === 0) return "";
+            
+            let signo = "";
+            if (coef > 0) {
+                signo = esPrimero ? "" : "+";
+            } else {
+                signo = "-";
+            }
+            
+            const valor = Math.abs(coef);
+            let coeficienteStr = "";
+            
+            if (valor === 1) {
+                coeficienteStr = esPrimero ? "" : "1";
+            } else {
+                coeficienteStr = valor.toString();
+            }
+            
+            return `${signo} ${coeficienteStr}`;
+        }
+        
+        function limpiarCampos() {
+            document.getElementById('coeficiente-a').value = "";
+            document.getElementById('coeficiente-b').value = "";
+            document.getElementById('coeficiente-c').value = "";
+            document.getElementById('resultados').style.display = 'none';
+            document.getElementById('grafica-container').style.display = 'none';
+            ultimosResultados = null;
+            document.getElementById('coeficiente-a').focus();
+        }
+    </script>
+</body>
+</html>
