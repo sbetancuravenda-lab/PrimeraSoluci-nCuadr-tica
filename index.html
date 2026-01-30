@@ -257,6 +257,105 @@
             padding: 0 10px;
         }
         
+        /* Gráfica */
+        .grafica-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .grafica-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .grafica-titulo {
+            color: #2c3e50;
+            font-size: 1.4rem;
+        }
+        
+        .controles-grafica {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .control-rango {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 6px;
+        }
+        
+        .control-rango label {
+            font-weight: 600;
+            margin-right: 8px;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        .control-rango input {
+            width: 70px;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .btn-actualizar {
+            background-color: #27ae60;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-actualizar:hover {
+            background-color: #219653;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fcfcfc;
+        }
+        
+        #graficaCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .leyenda-grafica {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .item-leyenda {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .color-leyenda {
+            width: 15px;
+            height: 15px;
+            margin-right: 8px;
+            border-radius: 3px;
+        }
+        
         /* Resultados */
         .resultados {
             background-color: white;
@@ -421,6 +520,19 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+            
+            .grafica-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .controles-grafica {
+                width: 100%;
+            }
+            
+            .canvas-container {
+                height: 300px;
+            }
         }
         
         @media (max-width: 576px) {
@@ -438,6 +550,14 @@
             
             .menu-lateral nav ul li i {
                 margin-right: 0;
+            }
+            
+            .control-rango {
+                flex: 1;
+            }
+            
+            .controles-grafica {
+                flex-direction: column;
             }
         }
     </style>
@@ -515,6 +635,49 @@
                 </div>
             </div>
 
+            <!-- Gráfica de la parábola -->
+            <div class="grafica-container" id="grafica-container" style="display: none;">
+                <div class="grafica-header">
+                    <h3 class="grafica-titulo"><i class="fas fa-chart-line"></i> Gráfica de la Parábola</h3>
+                    <div class="controles-grafica">
+                        <div class="control-rango">
+                            <label>Eje X:</label>
+                            <input type="number" id="rango-x-min" placeholder="Mín" value="-10">
+                            <span style="margin: 0 5px;">a</span>
+                            <input type="number" id="rango-x-max" placeholder="Máx" value="10">
+                        </div>
+                        <div class="control-rango">
+                            <label>Eje Y:</label>
+                            <input type="number" id="rango-y-min" placeholder="Mín" value="-10">
+                            <span style="margin: 0 5px;">a</span>
+                            <input type="number" id="rango-y-max" placeholder="Máx" value="10">
+                        </div>
+                        <button class="btn-actualizar" id="actualizar-grafica">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="graficaCanvas"></canvas>
+                </div>
+                
+                <div class="leyenda-grafica">
+                    <div class="item-leyenda">
+                        <div class="color-leyenda" style="background-color: #3498db;"></div>
+                        <span>Parábola: y = ax² + bx + c</span>
+                    </div>
+                    <div class="item-leyenda">
+                        <div class="color-leyenda" style="background-color: #e74c3c;"></div>
+                        <span>Raíces (si son reales)</span>
+                    </div>
+                    <div class="item-leyenda">
+                        <div class="color-leyenda" style="background-color: #2c3e50;"></div>
+                        <span>Ejes coordenados</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="resultados" id="resultados" style="display: none;">
                 <h2 class="titulo-resultados"><i class="fas fa-chart-line"></i> Resultados</h2>
                 
@@ -561,6 +724,15 @@
                     <li><strong>D < 0</strong>: La ecuación tiene dos soluciones complejas conjugadas.</li>
                 </ul>
                 
+                <h3>Representación gráfica</h3>
+                <p>La gráfica de una ecuación cuadrática es una parábola:</p>
+                <ul>
+                    <li>Si <strong>a > 0</strong>, la parábola se abre hacia arriba (forma de U).</li>
+                    <li>Si <strong>a < 0</strong>, la parábola se abre hacia abajo (forma de ∩).</li>
+                    <li>El vértice de la parábola está en el punto <strong>(-b/(2a), f(-b/(2a)))</strong>.</li>
+                    <li>Las raíces de la ecuación (si son reales) son los puntos donde la parábola cruza el eje X.</li>
+                </ul>
+                
                 <h3>Control de decimales</h3>
                 <p>Esta aplicación te permite ajustar la precisión de los resultados usando los botones de aumento/disminución de decimales:</p>
                 <ul>
@@ -570,12 +742,21 @@
                     <li>Los cambios se aplican inmediatamente a los resultados mostrados.</li>
                 </ul>
                 
+                <h3>Gráfica interactiva</h3>
+                <p>Puedes visualizar la parábola correspondiente a la ecuación y ajustar los rangos de los ejes:</p>
+                <ul>
+                    <li><strong>Eje X</strong>: Controla el rango horizontal de la gráfica.</li>
+                    <li><strong>Eje Y</strong>: Controla el rango vertical de la gráfica.</li>
+                    <li>Las raíces reales se marcan con puntos rojos en la gráfica.</li>
+                    <li>Usa el botón "Actualizar" para aplicar los cambios en los rangos.</li>
+                </ul>
+                
                 <h3>Cómo usar esta herramienta</h3>
                 <p>1. Ingresa los valores de los coeficientes a, b y c en los campos correspondientes.</p>
                 <p>2. Ajusta el número de decimales deseados usando los botones +/-.</p>
                 <p>3. Haz clic en "Calcular soluciones" para resolver la ecuación.</p>
-                <p>4. Revisa los resultados que incluyen el discriminante y las soluciones.</p>
-                <p>5. Si el discriminante es negativo, se mostrará el mensaje "La solución es compleja".</p>
+                <p>4. Visualiza la gráfica de la parábola y ajusta los rangos si es necesario.</p>
+                <p>5. Revisa los resultados que incluyen el discriminante y las soluciones.</p>
                 
                 <div class="formula ejemplo">
                     <p><strong>Ejemplo:</strong> Para 2x² - 4x - 6 = 0</p>
@@ -593,9 +774,21 @@
         // Variables globales
         let decimales = 4; // Valor por defecto
         let ultimosResultados = null; // Para almacenar los últimos resultados calculados
+        let canvas, ctx;
+        let rangoXMin = -10, rangoXMax = 10;
+        let rangoYMin = -10, rangoYMax = 10;
         
-        // Navegación del menú lateral
+        // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar canvas
+            canvas = document.getElementById('graficaCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Ajustar tamaño del canvas
+            ajustarCanvas();
+            window.addEventListener('resize', ajustarCanvas);
+            
+            // Configurar navegación del menú lateral
             const menuItems = document.querySelectorAll('.menu-lateral nav ul li');
             const secciones = document.querySelectorAll('.seccion');
             
@@ -630,6 +823,10 @@
             btnAumentar.addEventListener('click', aumentarDecimales);
             btnDisminuir.addEventListener('click', disminuirDecimales);
             
+            // Configurar controles de gráfica
+            const btnActualizarGrafica = document.getElementById('actualizar-grafica');
+            btnActualizarGrafica.addEventListener('click', actualizarRangosGrafica);
+            
             // Actualizar visualización de decimales
             actualizarVisualizacionDecimales();
             
@@ -643,6 +840,17 @@
             // Cargar ejemplo al inicio
             cargarEjemplo();
         });
+        
+        function ajustarCanvas() {
+            const container = document.querySelector('.canvas-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Redibujar si hay una gráfica activa
+            if (ultimosResultados) {
+                dibujarGrafica(ultimosResultados);
+            }
+        }
         
         function cargarEjemplo() {
             document.getElementById('coeficiente-a').value = 1;
@@ -683,6 +891,35 @@
             document.getElementById('aumentar-decimal').disabled = decimales === 10;
         }
         
+        function actualizarRangosGrafica() {
+            const xMinInput = document.getElementById('rango-x-min');
+            const xMaxInput = document.getElementById('rango-x-max');
+            const yMinInput = document.getElementById('rango-y-min');
+            const yMaxInput = document.getElementById('rango-y-max');
+            
+            // Validar y actualizar rangos
+            rangoXMin = parseFloat(xMinInput.value) || -10;
+            rangoXMax = parseFloat(xMaxInput.value) || 10;
+            rangoYMin = parseFloat(yMinInput.value) || -10;
+            rangoYMax = parseFloat(yMaxInput.value) || 10;
+            
+            // Asegurar que mínimo < máximo
+            if (rangoXMin >= rangoXMax) {
+                rangoXMax = rangoXMin + 1;
+                xMaxInput.value = rangoXMax;
+            }
+            
+            if (rangoYMin >= rangoYMax) {
+                rangoYMax = rangoYMin + 1;
+                yMaxInput.value = rangoYMax;
+            }
+            
+            // Redibujar gráfica si hay resultados
+            if (ultimosResultados) {
+                dibujarGrafica(ultimosResultados);
+            }
+        }
+        
         function calcularSoluciones() {
             // Obtener valores de los coeficientes
             const a = parseFloat(document.getElementById('coeficiente-a').value);
@@ -701,8 +938,9 @@
                 return;
             }
             
-            // Mostrar la sección de resultados
+            // Mostrar la sección de resultados y gráfica
             document.getElementById('resultados').style.display = 'block';
+            document.getElementById('grafica-container').style.display = 'block';
             
             // Calcular el discriminante
             const D = Math.pow(b, 2) - (4 * a * c);
@@ -712,6 +950,9 @@
             
             // Mostrar resultados con los decimales actuales
             mostrarResultadosConDecimales(ultimosResultados);
+            
+            // Dibujar gráfica
+            dibujarGrafica(ultimosResultados);
             
             // Desplazar hacia los resultados
             document.getElementById('resultados').scrollIntoView({ behavior: 'smooth' });
@@ -753,118 +994,4 @@
                         <p>
                             <strong>x₁ =</strong> <span class="valor-solucion">${formatearNumero(x1)}</span>
                             <br>
-                            <strong>x₂ =</strong> <span class="valor-solucion">${formatearNumero(x2)}</span>
-                        </p>
-                        <p>
-                            <strong>Cálculo:</strong><br>
-                            x₁ = [${-b} + √${D}] / (2·${a}) = ${formatearNumero(x1)}<br>
-                            x₂ = [${-b} - √${D}] / (2·${a}) = ${formatearNumero(x2)}
-                        </p>
-                        <p><em>Mostrando ${decimales} decimales</em></p>
-                    </div>
-                `;
-                
-                explicacionHTML = `
-                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
-                    <p>Como el discriminante D = ${formatearNumero(D)} es mayor que cero, la ecuación cuadrática tiene dos soluciones reales y distintas.</p>
-                    <p>Esto significa que la parábola representada por la ecuación cruza el eje X en dos puntos distintos: (${formatearNumero(x1)}, 0) y (${formatearNumero(x2)}, 0).</p>
-                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
-                `;
-            } 
-            else if (D === 0) {
-                // Una solución real (doble)
-                const x = -b / (2 * a);
-                
-                solucionHTML = `
-                    <div class="solucion-unica">
-                        <h3><i class="fas fa-info-circle"></i> La ecuación tiene una solución real doble:</h3>
-                        <p><strong>x =</strong> <span class="valor-solucion">${formatearNumero(x)}</span></p>
-                        <p>
-                            <strong>Cálculo:</strong><br>
-                            x = ${-b} / (2·${a}) = ${formatearNumero(x)}
-                        </p>
-                        <p><em>Mostrando ${decimales} decimales</em></p>
-                    </div>
-                `;
-                
-                explicacionHTML = `
-                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
-                    <p>Como el discriminante D = ${formatearNumero(D)} es igual a cero, la ecuación cuadrática tiene una única solución real (solución doble).</p>
-                    <p>Esto significa que la parábola representada por la ecuación toca el eje X en un solo punto: (${formatearNumero(x)}, 0), que es el vértice de la parábola.</p>
-                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
-                `;
-            } 
-            else {
-                // Soluciones complejas
-                const parteReal = -b/(2*a);
-                const parteImaginaria = Math.sqrt(-D)/(2*a);
-                
-                solucionHTML = `
-                    <div class="solucion-compleja">
-                        <h3><i class="fas fa-exclamation-triangle"></i> La solución es compleja</h3>
-                        <p>El discriminante es negativo (D = ${formatearNumero(D)}), por lo tanto las soluciones son números complejos.</p>
-                        <p>
-                            <strong>Parte real:</strong> <span class="valor-solucion">${formatearNumero(parteReal)}</span><br>
-                            <strong>Parte imaginaria:</strong> <span class="valor-solucion">±${formatearNumero(parteImaginaria)}i</span>
-                        </p>
-                        <p>
-                            <strong>Solución completa:</strong><br>
-                            x = ${formatearNumero(parteReal)} ± ${formatearNumero(parteImaginaria)}i
-                        </p>
-                        <p><em>Mostrando ${decimales} decimales</em></p>
-                    </div>
-                `;
-                
-                explicacionHTML = `
-                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
-                    <p>Como el discriminante D = ${formatearNumero(D)} es menor que cero, la ecuación cuadrática no tiene soluciones reales, sino dos soluciones complejas conjugadas.</p>
-                    <p>Esto significa que la parábola representada por la ecuación no cruza el eje X en ningún punto real.</p>
-                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
-                `;
-            }
-            
-            document.getElementById('solucion-mostrada').innerHTML = solucionHTML;
-            document.getElementById('explicacion-mostrada').innerHTML = explicacionHTML;
-        }
-        
-        function formatearNumero(num) {
-            // Formatear número con la cantidad de decimales especificada
-            if (decimales === 0) {
-                return Math.round(num).toString();
-            }
-            return num.toFixed(decimales);
-        }
-        
-        function formatearCoeficiente(coef, esPrimero) {
-            if (coef === 0) return "";
-            
-            let signo = "";
-            if (coef > 0) {
-                signo = esPrimero ? "" : "+";
-            } else {
-                signo = "-";
-            }
-            
-            const valor = Math.abs(coef);
-            let coeficienteStr = "";
-            
-            if (valor === 1) {
-                coeficienteStr = esPrimero ? "" : "1";
-            } else {
-                coeficienteStr = valor.toString();
-            }
-            
-            return `${signo} ${coeficienteStr}`;
-        }
-        
-        function limpiarCampos() {
-            document.getElementById('coeficiente-a').value = "";
-            document.getElementById('coeficiente-b').value = "";
-            document.getElementById('coeficiente-c').value = "";
-            document.getElementById('resultados').style.display = 'none';
-            ultimosResultados = null;
-            document.getElementById('coeficiente-a').focus();
-        }
-    </script>
-</body>
-</html>
+                            <strong>x₂ =</strong> <span class="valor-solucion">${
