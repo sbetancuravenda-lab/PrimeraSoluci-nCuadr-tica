@@ -199,6 +199,64 @@
             transform: translateY(-2px);
         }
         
+        /* Controles de decimales */
+        .controles-decimales {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .controles-decimales label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-right: 10px;
+        }
+        
+        .controles-decimales .contador {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-decimal {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-decimal:hover {
+            background-color: #3498db;
+        }
+        
+        .btn-decimal:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .valor-decimales {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0 10px;
+        }
+        
         /* Resultados */
         .resultados {
             background-color: white;
@@ -358,6 +416,11 @@
             .contenido-principal {
                 padding: 20px;
             }
+            
+            .controles-decimales {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
         
         @media (max-width: 576px) {
@@ -426,6 +489,22 @@
                         <input type="number" id="coeficiente-c" placeholder="Ejemplo: 2" step="any">
                     </div>
                 </div>
+                
+                <!-- Controles para decimales -->
+                <div class="controles-decimales">
+                    <label for="decimales">Decimales en resultados:</label>
+                    <div class="contador">
+                        <button class="btn-decimal" id="disminuir-decimal" title="Reducir decimales">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <div class="valor-decimales" id="valor-decimales">4</div>
+                        <button class="btn-decimal" id="aumentar-decimal" title="Aumentar decimales">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <span class="info-decimal">(Actual: <span id="decimales-actuales">4</span> decimales)</span>
+                </div>
+                
                 <div class="botones">
                     <button class="btn-calcular" id="calcular">
                         <i class="fas fa-calculator"></i> Calcular soluciones
@@ -482,11 +561,21 @@
                     <li><strong>D < 0</strong>: La ecuación tiene dos soluciones complejas conjugadas.</li>
                 </ul>
                 
+                <h3>Control de decimales</h3>
+                <p>Esta aplicación te permite ajustar la precisión de los resultados usando los botones de aumento/disminución de decimales:</p>
+                <ul>
+                    <li><strong>Aumentar decimales (+)</strong>: Muestra más dígitos decimales para mayor precisión.</li>
+                    <li><strong>Disminuir decimales (-)</strong>: Muestra menos dígitos decimales para resultados más compactos.</li>
+                    <li>El rango permitido es de 0 a 10 decimales.</li>
+                    <li>Los cambios se aplican inmediatamente a los resultados mostrados.</li>
+                </ul>
+                
                 <h3>Cómo usar esta herramienta</h3>
                 <p>1. Ingresa los valores de los coeficientes a, b y c en los campos correspondientes.</p>
-                <p>2. Haz clic en "Calcular soluciones" para resolver la ecuación.</p>
-                <p>3. Revisa los resultados que incluyen el discriminante y las soluciones.</p>
-                <p>4. Si el discriminante es negativo, se mostrará el mensaje "La solución es compleja".</p>
+                <p>2. Ajusta el número de decimales deseados usando los botones +/-.</p>
+                <p>3. Haz clic en "Calcular soluciones" para resolver la ecuación.</p>
+                <p>4. Revisa los resultados que incluyen el discriminante y las soluciones.</p>
+                <p>5. Si el discriminante es negativo, se mostrará el mensaje "La solución es compleja".</p>
                 
                 <div class="formula ejemplo">
                     <p><strong>Ejemplo:</strong> Para 2x² - 4x - 6 = 0</p>
@@ -501,6 +590,10 @@
     </main>
 
     <script>
+        // Variables globales
+        let decimales = 4; // Valor por defecto
+        let ultimosResultados = null; // Para almacenar los últimos resultados calculados
+        
         // Navegación del menú lateral
         document.addEventListener('DOMContentLoaded', function() {
             const menuItems = document.querySelectorAll('.menu-lateral nav ul li');
@@ -530,6 +623,16 @@
             btnCalcular.addEventListener('click', calcularSoluciones);
             btnLimpiar.addEventListener('click', limpiarCampos);
             
+            // Configurar controles de decimales
+            const btnAumentar = document.getElementById('aumentar-decimal');
+            const btnDisminuir = document.getElementById('disminuir-decimal');
+            
+            btnAumentar.addEventListener('click', aumentarDecimales);
+            btnDisminuir.addEventListener('click', disminuirDecimales);
+            
+            // Actualizar visualización de decimales
+            actualizarVisualizacionDecimales();
+            
             // Permitir calcular con Enter
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
@@ -545,6 +648,39 @@
             document.getElementById('coeficiente-a').value = 1;
             document.getElementById('coeficiente-b').value = -5;
             document.getElementById('coeficiente-c').value = 6;
+        }
+        
+        function aumentarDecimales() {
+            if (decimales < 10) {
+                decimales++;
+                actualizarVisualizacionDecimales();
+                
+                // Si ya hay resultados calculados, actualizarlos con la nueva precisión
+                if (ultimosResultados) {
+                    mostrarResultadosConDecimales(ultimosResultados);
+                }
+            }
+        }
+        
+        function disminuirDecimales() {
+            if (decimales > 0) {
+                decimales--;
+                actualizarVisualizacionDecimales();
+                
+                // Si ya hay resultados calculados, actualizarlos con la nueva precisión
+                if (ultimosResultados) {
+                    mostrarResultadosConDecimales(ultimosResultados);
+                }
+            }
+        }
+        
+        function actualizarVisualizacionDecimales() {
+            document.getElementById('valor-decimales').textContent = decimales;
+            document.getElementById('decimales-actuales').textContent = decimales;
+            
+            // Habilitar/deshabilitar botones según los límites
+            document.getElementById('disminuir-decimal').disabled = decimales === 0;
+            document.getElementById('aumentar-decimal').disabled = decimales === 10;
         }
         
         function calcularSoluciones() {
@@ -566,10 +702,23 @@
             }
             
             // Mostrar la sección de resultados
-            resultadosDiv.style.display = 'block';
+            document.getElementById('resultados').style.display = 'block';
             
             // Calcular el discriminante
             const D = Math.pow(b, 2) - (4 * a * c);
+            
+            // Almacenar los resultados para poder recalcular con diferentes decimales
+            ultimosResultados = { a, b, c, D };
+            
+            // Mostrar resultados con los decimales actuales
+            mostrarResultadosConDecimales(ultimosResultados);
+            
+            // Desplazar hacia los resultados
+            document.getElementById('resultados').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function mostrarResultadosConDecimales(datos) {
+            const { a, b, c, D } = datos;
             
             // Mostrar la ecuación
             const ecuacionHTML = `
@@ -602,22 +751,24 @@
                     <div class="solucion-real">
                         <h3><i class="fas fa-check-circle"></i> La ecuación tiene dos soluciones reales distintas:</h3>
                         <p>
-                            <strong>x₁ =</strong> <span class="valor-solucion">${x1.toFixed(4)}</span>
+                            <strong>x₁ =</strong> <span class="valor-solucion">${formatearNumero(x1)}</span>
                             <br>
-                            <strong>x₂ =</strong> <span class="valor-solucion">${x2.toFixed(4)}</span>
+                            <strong>x₂ =</strong> <span class="valor-solucion">${formatearNumero(x2)}</span>
                         </p>
                         <p>
                             <strong>Cálculo:</strong><br>
-                            x₁ = [${-b} + √${D}] / (2·${a}) = ${x1.toFixed(4)}<br>
-                            x₂ = [${-b} - √${D}] / (2·${a}) = ${x2.toFixed(4)}
+                            x₁ = [${-b} + √${D}] / (2·${a}) = ${formatearNumero(x1)}<br>
+                            x₂ = [${-b} - √${D}] / (2·${a}) = ${formatearNumero(x2)}
                         </p>
+                        <p><em>Mostrando ${decimales} decimales</em></p>
                     </div>
                 `;
                 
                 explicacionHTML = `
                     <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
-                    <p>Como el discriminante D = ${D} es mayor que cero, la ecuación cuadrática tiene dos soluciones reales y distintas.</p>
-                    <p>Esto significa que la parábola representada por la ecuación cruza el eje X en dos puntos distintos: (${x1.toFixed(2)}, 0) y (${x2.toFixed(2)}, 0).</p>
+                    <p>Como el discriminante D = ${formatearNumero(D)} es mayor que cero, la ecuación cuadrática tiene dos soluciones reales y distintas.</p>
+                    <p>Esto significa que la parábola representada por la ecuación cruza el eje X en dos puntos distintos: (${formatearNumero(x1)}, 0) y (${formatearNumero(x2)}, 0).</p>
+                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
                 `;
             } 
             else if (D === 0) {
@@ -627,49 +778,61 @@
                 solucionHTML = `
                     <div class="solucion-unica">
                         <h3><i class="fas fa-info-circle"></i> La ecuación tiene una solución real doble:</h3>
-                        <p><strong>x =</strong> <span class="valor-solucion">${x.toFixed(4)}</span></p>
+                        <p><strong>x =</strong> <span class="valor-solucion">${formatearNumero(x)}</span></p>
                         <p>
                             <strong>Cálculo:</strong><br>
-                            x = ${-b} / (2·${a}) = ${x.toFixed(4)}
+                            x = ${-b} / (2·${a}) = ${formatearNumero(x)}
                         </p>
+                        <p><em>Mostrando ${decimales} decimales</em></p>
                     </div>
                 `;
                 
                 explicacionHTML = `
                     <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
-                    <p>Como el discriminante D = ${D} es igual a cero, la ecuación cuadrática tiene una única solución real (solución doble).</p>
-                    <p>Esto significa que la parábola representada por la ecuación toca el eje X en un solo punto: (${x.toFixed(2)}, 0), que es el vértice de la parábola.</p>
+                    <p>Como el discriminante D = ${formatearNumero(D)} es igual a cero, la ecuación cuadrática tiene una única solución real (solución doble).</p>
+                    <p>Esto significa que la parábola representada por la ecuación toca el eje X en un solo punto: (${formatearNumero(x)}, 0), que es el vértice de la parábola.</p>
+                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
                 `;
             } 
             else {
                 // Soluciones complejas
+                const parteReal = -b/(2*a);
+                const parteImaginaria = Math.sqrt(-D)/(2*a);
+                
                 solucionHTML = `
                     <div class="solucion-compleja">
                         <h3><i class="fas fa-exclamation-triangle"></i> La solución es compleja</h3>
-                        <p>El discriminante es negativo (D = ${D}), por lo tanto las soluciones son números complejos.</p>
+                        <p>El discriminante es negativo (D = ${formatearNumero(D)}), por lo tanto las soluciones son números complejos.</p>
                         <p>
-                            <strong>Parte real:</strong> <span class="valor-solucion">${(-b/(2*a)).toFixed(4)}</span><br>
-                            <strong>Parte imaginaria:</strong> <span class="valor-solucion">±${(Math.sqrt(-D)/(2*a)).toFixed(4)}i</span>
+                            <strong>Parte real:</strong> <span class="valor-solucion">${formatearNumero(parteReal)}</span><br>
+                            <strong>Parte imaginaria:</strong> <span class="valor-solucion">±${formatearNumero(parteImaginaria)}i</span>
                         </p>
                         <p>
                             <strong>Solución completa:</strong><br>
-                            x = ${(-b/(2*a)).toFixed(4)} ± ${(Math.sqrt(-D)/(2*a)).toFixed(4)}i
+                            x = ${formatearNumero(parteReal)} ± ${formatearNumero(parteImaginaria)}i
                         </p>
+                        <p><em>Mostrando ${decimales} decimales</em></p>
                     </div>
                 `;
                 
                 explicacionHTML = `
                     <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
-                    <p>Como el discriminante D = ${D} es menor que cero, la ecuación cuadrática no tiene soluciones reales, sino dos soluciones complejas conjugadas.</p>
+                    <p>Como el discriminante D = ${formatearNumero(D)} es menor que cero, la ecuación cuadrática no tiene soluciones reales, sino dos soluciones complejas conjugadas.</p>
                     <p>Esto significa que la parábola representada por la ecuación no cruza el eje X en ningún punto real.</p>
+                    <p><small>Puedes ajustar el número de decimales usando los controles arriba.</small></p>
                 `;
             }
             
             document.getElementById('solucion-mostrada').innerHTML = solucionHTML;
             document.getElementById('explicacion-mostrada').innerHTML = explicacionHTML;
-            
-            // Desplazar hacia los resultados
-            resultadosDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function formatearNumero(num) {
+            // Formatear número con la cantidad de decimales especificada
+            if (decimales === 0) {
+                return Math.round(num).toString();
+            }
+            return num.toFixed(decimales);
         }
         
         function formatearCoeficiente(coef, esPrimero) {
@@ -698,7 +861,8 @@
             document.getElementById('coeficiente-a').value = "";
             document.getElementById('coeficiente-b').value = "";
             document.getElementById('coeficiente-c').value = "";
-            resultadosDiv.style.display = 'none';
+            document.getElementById('resultados').style.display = 'none';
+            ultimosResultados = null;
             document.getElementById('coeficiente-a').focus();
         }
     </script>
