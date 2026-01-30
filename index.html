@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solucionador de Ecuaciones Cuadráticas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        /* Menú lateral */
+        .menu-lateral {
+            width: 250px;
+            background: linear-gradient(to bottom, #2c3e50, #34495e);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            color: #3498db;
+        }
+        
+        .logo p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .menu-lateral nav ul {
+            list-style: none;
+        }
+        
+        .menu-lateral nav ul li {
+            padding: 12px 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+        
+        .menu-lateral nav ul li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left-color: #3498db;
+        }
+        
+        .menu-lateral nav ul li.active {
+            background-color: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+        }
+        
+        .menu-lateral nav ul li i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Contenido principal */
+        .contenido-principal {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        /* Secciones */
+        .seccion {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .seccion.activa {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Calculadora */
+        .calculadora {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .titulo-formulario {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .formulario {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .grupo-input {
+            margin-bottom: 20px;
+        }
+        
+        .grupo-input label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .grupo-input input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .grupo-input input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .botones {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-calcular {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-calcular:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-limpiar {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-limpiar:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        /* Resultados */
+        .resultados {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        .titulo-resultados {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ecuacion {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.3rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .discriminante {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .solucion {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .solucion-real {
+            background-color: #e8f6f3;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .solucion-compleja {
+            background-color: #fdedec;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .solucion-unica {
+            background-color: #fef9e7;
+            border-left: 4px solid #f1c40f;
+        }
+        
+        .solucion h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .valor-solucion {
+            display: inline-block;
+            background-color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin: 5px 10px 5px 0;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .explicacion {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .explicacion h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .explicacion ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        /* Información */
+        .informacion {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            line-height: 1.7;
+        }
+        
+        .informacion h3 {
+            color: #2c3e50;
+            margin: 20px 0 10px;
+        }
+        
+        .informacion p {
+            margin-bottom: 15px;
+        }
+        
+        .formula {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .menu-lateral {
+                width: 100%;
+                flex-direction: row;
+                padding: 10px 0;
+            }
+            
+            .logo {
+                border-bottom: none;
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 0;
+                padding: 10px 20px;
+            }
+            
+            .menu-lateral nav ul {
+                display: flex;
+                flex: 1;
+                justify-content: space-around;
+            }
+            
+            .menu-lateral nav ul li {
+                padding: 10px;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+            }
+            
+            .menu-lateral nav ul li:hover,
+            .menu-lateral nav ul li.active {
+                border-left-color: transparent;
+                border-bottom-color: #3498db;
+            }
+            
+            .contenido-principal {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .formulario {
+                grid-template-columns: 1fr;
+            }
+            
+            .botones {
+                flex-direction: column;
+            }
+            
+            .menu-lateral nav ul li span {
+                display: none;
+            }
+            
+            .menu-lateral nav ul li i {
+                margin-right: 0;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Menú lateral -->
+    <aside class="menu-lateral">
+        <div class="logo">
+            <h1><i class="fas fa-calculator"></i> Solucionador</h1>
+            <p>Ecuaciones Cuadráticas</p>
+        </div>
+        <nav>
+            <ul>
+                <li class="active" data-target="calculadora">
+                    <i class="fas fa-calculator"></i>
+                    <span>Calculadora</span>
+                </li>
+                <li data-target="informacion">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Información</span>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="contenido-principal">
+        <header class="header">
+            <h2>Solucionador de Ecuaciones Cuadráticas</h2>
+            <p>Resuelve ecuaciones de segundo grado de forma rápida y visual</p>
+        </header>
+
+        <!-- Sección Calculadora -->
+        <section id="calculadora" class="seccion activa">
+            <div class="calculadora">
+                <h2 class="titulo-formulario"><i class="fas fa-edit"></i> Ingresa los coeficientes</h2>
+                <div class="formulario">
+                    <div class="grupo-input">
+                        <label for="coeficiente-a">Coeficiente a</label>
+                        <input type="number" id="coeficiente-a" placeholder="Ejemplo: 1" step="any">
+                    </div>
+                    <div class="grupo-input">
+                        <label for="coeficiente-b">Coeficiente b</label>
+                        <input type="number" id="coeficiente-b" placeholder="Ejemplo: -3" step="any">
+                    </div>
+                    <div class="grupo-input">
+                        <label for="coeficiente-c">Coeficiente c</label>
+                        <input type="number" id="coeficiente-c" placeholder="Ejemplo: 2" step="any">
+                    </div>
+                </div>
+                <div class="botones">
+                    <button class="btn-calcular" id="calcular">
+                        <i class="fas fa-calculator"></i> Calcular soluciones
+                    </button>
+                    <button class="btn-limpiar" id="limpiar">
+                        <i class="fas fa-broom"></i> Limpiar campos
+                    </button>
+                </div>
+            </div>
+
+            <div class="resultados" id="resultados" style="display: none;">
+                <h2 class="titulo-resultados"><i class="fas fa-chart-line"></i> Resultados</h2>
+                
+                <div class="ecuacion" id="ecuacion-mostrada">
+                    <!-- Aquí se mostrará la ecuación ingresada -->
+                </div>
+                
+                <div class="discriminante" id="discriminante-mostrado">
+                    <!-- Aquí se mostrará el discriminante -->
+                </div>
+                
+                <div class="solucion" id="solucion-mostrada">
+                    <!-- Aquí se mostrarán las soluciones -->
+                </div>
+                
+                <div class="explicacion" id="explicacion-mostrada">
+                    <!-- Aquí se mostrará la explicación -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Información -->
+        <section id="informacion" class="seccion">
+            <div class="informacion">
+                <h2><i class="fas fa-info-circle"></i> Información sobre ecuaciones cuadráticas</h2>
+                
+                <p>Una ecuación cuadrática es una ecuación de segundo grado que tiene la forma:</p>
+                
+                <div class="formula">ax² + bx + c = 0</div>
+                
+                <p>Donde <strong>a</strong>, <strong>b</strong> y <strong>c</strong> son coeficientes reales, y <strong>a ≠ 0</strong>.</p>
+                
+                <h3>Fórmula cuadrática</h3>
+                <p>La solución de una ecuación cuadrática se obtiene mediante la fórmula:</p>
+                
+                <div class="formula">x = [-b ± √(b² - 4ac)] / (2a)</div>
+                
+                <h3>Discriminante</h3>
+                <p>El discriminante (D) determina la naturaleza de las soluciones:</p>
+                
+                <ul>
+                    <li><strong>D > 0</strong>: La ecuación tiene dos soluciones reales distintas.</li>
+                    <li><strong>D = 0</strong>: La ecuación tiene una solución real doble.</li>
+                    <li><strong>D < 0</strong>: La ecuación tiene dos soluciones complejas conjugadas.</li>
+                </ul>
+                
+                <h3>Cómo usar esta herramienta</h3>
+                <p>1. Ingresa los valores de los coeficientes a, b y c en los campos correspondientes.</p>
+                <p>2. Haz clic en "Calcular soluciones" para resolver la ecuación.</p>
+                <p>3. Revisa los resultados que incluyen el discriminante y las soluciones.</p>
+                <p>4. Si el discriminante es negativo, se mostrará el mensaje "La solución es compleja".</p>
+                
+                <div class="formula ejemplo">
+                    <p><strong>Ejemplo:</strong> Para 2x² - 4x - 6 = 0</p>
+                    <p>a = 2, b = -4, c = -6</p>
+                    <p>D = (-4)² - 4(2)(-6) = 16 + 48 = 64</p>
+                    <p>D > 0, entonces tiene dos soluciones reales:</p>
+                    <p>x₁ = [4 + √64] / 4 = [4 + 8] / 4 = 3</p>
+                    <p>x₂ = [4 - √64] / 4 = [4 - 8] / 4 = -1</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Navegación del menú lateral
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu-lateral nav ul li');
+            const secciones = document.querySelectorAll('.seccion');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remover clase activa de todos los items
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    // Agregar clase activa al item clickeado
+                    this.classList.add('active');
+                    
+                    // Ocultar todas las secciones
+                    secciones.forEach(seccion => seccion.classList.remove('activa'));
+                    
+                    // Mostrar la sección correspondiente
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.add('activa');
+                });
+            });
+            
+            // Configurar botones
+            const btnCalcular = document.getElementById('calcular');
+            const btnLimpiar = document.getElementById('limpiar');
+            const resultadosDiv = document.getElementById('resultados');
+            
+            btnCalcular.addEventListener('click', calcularSoluciones);
+            btnLimpiar.addEventListener('click', limpiarCampos);
+            
+            // Permitir calcular con Enter
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    calcularSoluciones();
+                }
+            });
+            
+            // Cargar ejemplo al inicio
+            cargarEjemplo();
+        });
+        
+        function cargarEjemplo() {
+            document.getElementById('coeficiente-a').value = 1;
+            document.getElementById('coeficiente-b').value = -5;
+            document.getElementById('coeficiente-c').value = 6;
+        }
+        
+        function calcularSoluciones() {
+            // Obtener valores de los coeficientes
+            const a = parseFloat(document.getElementById('coeficiente-a').value);
+            const b = parseFloat(document.getElementById('coeficiente-b').value);
+            const c = parseFloat(document.getElementById('coeficiente-c').value);
+            
+            // Validar que a no sea cero
+            if (a === 0) {
+                alert("El coeficiente 'a' no puede ser cero en una ecuación cuadrática.");
+                return;
+            }
+            
+            // Validar que todos los campos estén completos
+            if (isNaN(a) || isNaN(b) || isNaN(c)) {
+                alert("Por favor, completa todos los campos con valores numéricos.");
+                return;
+            }
+            
+            // Mostrar la sección de resultados
+            resultadosDiv.style.display = 'block';
+            
+            // Calcular el discriminante
+            const D = Math.pow(b, 2) - (4 * a * c);
+            
+            // Mostrar la ecuación
+            const ecuacionHTML = `
+                <strong>Ecuación ingresada:</strong><br>
+                ${formatearCoeficiente(a, true)}x² ${formatearCoeficiente(b, false)}x ${formatearCoeficiente(c, false)} = 0
+            `;
+            document.getElementById('ecuacion-mostrada').innerHTML = ecuacionHTML;
+            
+            // Mostrar el discriminante
+            let discriminanteClass = "";
+            if (D > 0) discriminanteClass = "solucion-real";
+            else if (D === 0) discriminanteClass = "solucion-unica";
+            else discriminanteClass = "solucion-compleja";
+            
+            document.getElementById('discriminante-mostrado').innerHTML = `
+                <strong>Discriminante (D):</strong> D = b² - 4ac = ${b}² - 4·${a}·${c} = <span class="valor-solucion">${D}</span>
+            `;
+            document.getElementById('discriminante-mostrado').className = `discriminante ${discriminanteClass}`;
+            
+            // Calcular y mostrar soluciones según el discriminante
+            let solucionHTML = "";
+            let explicacionHTML = "";
+            
+            if (D > 0) {
+                // Dos soluciones reales
+                const x1 = (-b + Math.sqrt(D)) / (2 * a);
+                const x2 = (-b - Math.sqrt(D)) / (2 * a);
+                
+                solucionHTML = `
+                    <div class="solucion-real">
+                        <h3><i class="fas fa-check-circle"></i> La ecuación tiene dos soluciones reales distintas:</h3>
+                        <p>
+                            <strong>x₁ =</strong> <span class="valor-solucion">${x1.toFixed(4)}</span>
+                            <br>
+                            <strong>x₂ =</strong> <span class="valor-solucion">${x2.toFixed(4)}</span>
+                        </p>
+                        <p>
+                            <strong>Cálculo:</strong><br>
+                            x₁ = [${-b} + √${D}] / (2·${a}) = ${x1.toFixed(4)}<br>
+                            x₂ = [${-b} - √${D}] / (2·${a}) = ${x2.toFixed(4)}
+                        </p>
+                    </div>
+                `;
+                
+                explicacionHTML = `
+                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
+                    <p>Como el discriminante D = ${D} es mayor que cero, la ecuación cuadrática tiene dos soluciones reales y distintas.</p>
+                    <p>Esto significa que la parábola representada por la ecuación cruza el eje X en dos puntos distintos: (${x1.toFixed(2)}, 0) y (${x2.toFixed(2)}, 0).</p>
+                `;
+            } 
+            else if (D === 0) {
+                // Una solución real (doble)
+                const x = -b / (2 * a);
+                
+                solucionHTML = `
+                    <div class="solucion-unica">
+                        <h3><i class="fas fa-info-circle"></i> La ecuación tiene una solución real doble:</h3>
+                        <p><strong>x =</strong> <span class="valor-solucion">${x.toFixed(4)}</span></p>
+                        <p>
+                            <strong>Cálculo:</strong><br>
+                            x = ${-b} / (2·${a}) = ${x.toFixed(4)}
+                        </p>
+                    </div>
+                `;
+                
+                explicacionHTML = `
+                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
+                    <p>Como el discriminante D = ${D} es igual a cero, la ecuación cuadrática tiene una única solución real (solución doble).</p>
+                    <p>Esto significa que la parábola representada por la ecuación toca el eje X en un solo punto: (${x.toFixed(2)}, 0), que es el vértice de la parábola.</p>
+                `;
+            } 
+            else {
+                // Soluciones complejas
+                solucionHTML = `
+                    <div class="solucion-compleja">
+                        <h3><i class="fas fa-exclamation-triangle"></i> La solución es compleja</h3>
+                        <p>El discriminante es negativo (D = ${D}), por lo tanto las soluciones son números complejos.</p>
+                        <p>
+                            <strong>Parte real:</strong> <span class="valor-solucion">${(-b/(2*a)).toFixed(4)}</span><br>
+                            <strong>Parte imaginaria:</strong> <span class="valor-solucion">±${(Math.sqrt(-D)/(2*a)).toFixed(4)}i</span>
+                        </p>
+                        <p>
+                            <strong>Solución completa:</strong><br>
+                            x = ${(-b/(2*a)).toFixed(4)} ± ${(Math.sqrt(-D)/(2*a)).toFixed(4)}i
+                        </p>
+                    </div>
+                `;
+                
+                explicacionHTML = `
+                    <h3><i class="fas fa-lightbulb"></i> Explicación:</h3>
+                    <p>Como el discriminante D = ${D} es menor que cero, la ecuación cuadrática no tiene soluciones reales, sino dos soluciones complejas conjugadas.</p>
+                    <p>Esto significa que la parábola representada por la ecuación no cruza el eje X en ningún punto real.</p>
+                `;
+            }
+            
+            document.getElementById('solucion-mostrada').innerHTML = solucionHTML;
+            document.getElementById('explicacion-mostrada').innerHTML = explicacionHTML;
+            
+            // Desplazar hacia los resultados
+            resultadosDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function formatearCoeficiente(coef, esPrimero) {
+            if (coef === 0) return "";
+            
+            let signo = "";
+            if (coef > 0) {
+                signo = esPrimero ? "" : "+";
+            } else {
+                signo = "-";
+            }
+            
+            const valor = Math.abs(coef);
+            let coeficienteStr = "";
+            
+            if (valor === 1) {
+                coeficienteStr = esPrimero ? "" : "1";
+            } else {
+                coeficienteStr = valor.toString();
+            }
+            
+            return `${signo} ${coeficienteStr}`;
+        }
+        
+        function limpiarCampos() {
+            document.getElementById('coeficiente-a').value = "";
+            document.getElementById('coeficiente-b').value = "";
+            document.getElementById('coeficiente-c').value = "";
+            resultadosDiv.style.display = 'none';
+            document.getElementById('coeficiente-a').focus();
+        }
+    </script>
+</body>
+</html>
